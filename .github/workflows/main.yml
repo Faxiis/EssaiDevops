@@ -32,3 +32,20 @@ jobs:
       - run: |
           docker build . -t testregistredevops.azurecr.io/mon-app-devops:${{ github.sha }}
           docker push testregistredevops.azurecr.io/mon-app-devops:${{ github.sha }}
+          
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - name: 'Deploy to Azure Container Instances'
+        uses: 'azure/aci-deploy@v1'
+        with:
+          resource-group: ${{ secrets.RESOURCE_GROUP }}
+          dns-name-label: ${{ github.ref_name }}-testregistredevops
+          image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/mon-app-devops:${{ github.sha }}
+          registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          registry-username: ${{ secrets.ACR_USERNAME }}
+          registry-password: ${{ secrets.ACR_PASSWORD }}
+          name: testregistredevops
+          location: 'francecentral'
